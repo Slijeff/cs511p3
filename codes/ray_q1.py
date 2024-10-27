@@ -11,11 +11,31 @@ import typing
 import numpy as np
 
 
-def ray_q1(time: str, lineitem:pd.DataFrame) -> float:
-    # TODO: your codes begin
-    return -1
-    # end of your codes
+@ray.remote
+def process(data, start_date):
+    # Convert shipdate to datetime format within the data
+    data['l_shipdate'] = pd.to_datetime(data['l_shipdate'])
 
+    # filter the data based on the conditions
+    filtered_data = data[
+        (data['l_shipdate'] >= start_date) &
+        (data['l_shipdate'] < start_date + pd.DateOffset(years=1)) &
+        (data['l_discount'] >= 0.05) &
+        (data['l_discount'] <= 0.070001) &
+        (data['l_quantity'] < 24)
+    ]
+
+    # calculate and return the revenue for this data
+    return (filtered_data['l_extendedprice'] * filtered_data['l_discount']).sum()
+
+
+def ray_q1(time: str, lineitem: pd.DataFrame) -> float:
+    start_date = pd.to_datetime(time, format='%Y-%m-%d')
+    chunks = np.array_split(lineitem, 8)
+    tasks = [process.remote(chunk, start_date) for chunk in chunks]
+    revenue = sum(ray.get(tasks))
+    return revenue
+    # end of your codes
 
 
 if __name__ == "__main__":
@@ -34,4 +54,5 @@ if __name__ == "__main__":
         print("*******************pass**********************")
     except Exception as e:
         logger.error("Exception Occurred:" + str(e))
-        print(f"*******************failed, your incorrect result is {result}**************")
+        print(
+            f"*******************failed, your incorrect result is {result}**************")
