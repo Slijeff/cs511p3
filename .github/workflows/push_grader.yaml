@@ -1,0 +1,40 @@
+name: test correctness
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use the latest version of Ubuntu
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Checkout codes
+      uses: actions/checkout@v2  # Check out your repository's codes
+
+    - name: Set up Python
+      uses: actions/setup-python@v2  # Set up Python environment
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt  # If you have a requirements.txt file
+
+    - name: download the data
+      run:  |
+        gdown https://drive.google.com/drive/u/1/folders/1SfJhSPCvUfHI2Vc_toVZIIzz1_50LpOx -O . --folder
+        gdown https://drive.google.com/drive/u/1/folders/10Rx3yLCJ5VTXuqJe_2ZuKzRiDSzlV3A0 -O . --folder
+        unzip tables.zip
+        unzip correct_results.zip
+
+    - name: run the grader using test.py
+      run: |
+        ray start --head
+        ray start --address auto
+        ray start --address auto
+        python test.py

@@ -1,0 +1,45 @@
+name: automatic grader
+
+on:
+  workflow_dispatch:  # Allow manual workflows runs
+    inputs:
+      test_py_parameters:
+        description: 'Parameters to pass to python test.py (optional)'
+        required: false
+        default: ''
+      correct_results:
+        description: 'url to download correct results'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use the latest version of Ubuntu
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2  # Check out your repository's code
+
+    - name: Set up Python
+      uses: actions/setup-python@v2  # Set up Python environment
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt  # If you have a requirements.txt file
+
+    - name: download the data
+      run: |
+        gdown https://drive.google.com/drive/u/1/folders/1SfJhSPCvUfHI2Vc_toVZIIzz1_50LpOx -O . --folder
+        gdown https://drive.google.com/drive/u/1/folders/10Rx3yLCJ5VTXuqJe_2ZuKzRiDSzlV3A0 -O . --folder
+        unzip tables.zip
+        unzip correct_results.zip
+
+    - name: run the grader using test.py
+      run: |
+        ray start --head
+        ray start --address auto
+        ray start --address auto
+        python test.py ${{ github.event.inputs.test_py_parameters }}
