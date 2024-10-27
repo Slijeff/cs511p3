@@ -10,12 +10,22 @@ import ray
 import typing
 
 
-def pandas_q1(time: str, lineitem:pd.DataFrame) -> float:
-    # TODO: your codes begin
-    return -1
+def pandas_q1(time: str, lineitem: pd.DataFrame) -> float:
+    start_date = pd.to_datetime(time, format='%Y-%m-%d')
+    lineitem['l_shipdate'] = pd.to_datetime(lineitem['l_shipdate'])
+
+    filtered_df = lineitem[
+        (lineitem['l_shipdate'] >= start_date) &
+        (lineitem['l_shipdate'] < start_date + pd.DateOffset(years=1)) &
+        (lineitem['l_discount'] >= 0.05) &
+        (lineitem['l_discount'] <= 0.070001) &
+        (lineitem['l_quantity'] < 24)
+    ]
+    result = (filtered_df['l_extendedprice'] *
+              filtered_df['l_discount']).sum()
+
+    return result
     # end of your codes
-
-
 
 
 if __name__ == "__main__":
@@ -36,4 +46,5 @@ if __name__ == "__main__":
         print("*******************pass**********************")
     except Exception as e:
         logger.error("Exception Occurred:" + str(e))
-        print(f"*******************failed, your incorrect result is {result}**************")
+        print(
+            f"*******************failed, your incorrect result is {result}**************")

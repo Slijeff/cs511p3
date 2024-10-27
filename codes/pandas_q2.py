@@ -12,11 +12,26 @@ import util.judge_df_equal
 import tempfile
 
 
-def pandas_q2(timediff:int, lineitem:pd.DataFrame) -> pd.DataFrame:
-    #TODO: your codes begin
-    return pd.DataFrame()
-    #end of your codes
+def pandas_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
+    lineitem['l_shipdate'] = pd.to_datetime(lineitem['l_shipdate'])
+    filtered_df = lineitem[lineitem['l_shipdate'] <= pd.to_datetime(
+        '1998-12-01') - pd.DateOffset(days=timediff)]
 
+    def getValueAt(df, x, name): return df.loc[x.index, name]
+    result_df = filtered_df.groupby(['l_returnflag', 'l_linestatus']).agg(
+        sum_qty=('l_quantity', 'sum'),
+        sum_base_price=('l_extendedprice', 'sum'),
+        sum_disc_price=('l_extendedprice', lambda x: (
+            x * (1 - getValueAt(filtered_df, x, 'l_discount'))).sum()),
+        sum_charge=('l_extendedprice', lambda x: (
+            x * (1 - getValueAt(filtered_df, x, 'l_discount')) * (1 + getValueAt(filtered_df, x, 'l_tax'))).sum()),
+        avg_qty=('l_quantity', 'mean'),
+        avg_price=('l_extendedprice', 'mean'),
+        avg_disc=('l_discount', 'mean'),
+        count_order=('l_orderkey', 'count')
+    ).sort_values(by=['l_returnflag', 'l_linestatus']).reset_index()
+    return result_df
+    # end of your codes
 
 
 if __name__ == "__main__":
@@ -33,7 +48,7 @@ if __name__ == "__main__":
     result = pandas_q2(90, lineitem)
     # result.to_csv("correct_results/pandas_q2.csv", float_format='%.3f')
     with tempfile.NamedTemporaryFile(mode='w') as f:
-        result.to_csv(f.name, float_format='%.3f',index=False)
+        result.to_csv(f.name, float_format='%.3f', index=False)
         result = pd.read_csv(f.name)
         correct_result = pd.read_csv("correct_results/pandas_q2.csv")
         try:
@@ -41,6 +56,5 @@ if __name__ == "__main__":
             print("*******************pass**********************")
         except Exception as e:
             logger.error("Exception Occurred:" + str(e))
-            print(f"*******************failed, your incorrect result is {result}**************")
-
-
+            print(
+                f"*******************failed, your incorrect result is {result}**************")

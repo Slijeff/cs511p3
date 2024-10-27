@@ -14,10 +14,27 @@ import util.judge_df_equal
 
 
 def pandas_q4(time: str, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFrame:
-    #TODO: your codes begin
-    return pd.DataFrame()
-    #end of your codes
+    start_time = pd.to_datetime(time)
+    orders['o_orderdate'] = pd.to_datetime(orders['o_orderdate'])
+    lineitem['l_commitdate'] = pd.to_datetime(lineitem['l_commitdate'])
+    lineitem['l_receiptdate'] = pd.to_datetime(lineitem['l_receiptdate'])
 
+    filtered = orders[(orders['o_orderdate'] >= start_time) & (
+        orders['o_orderdate'] < start_time + pd.DateOffset(months=3))]
+
+    valid = filtered[filtered['o_orderkey'].isin(
+        lineitem[lineitem['l_commitdate']
+                 < lineitem['l_receiptdate']]['l_orderkey'].unique()
+    )
+    ]
+
+    result = valid.groupby('o_orderpriority') \
+        .size() \
+        .reset_index(name='order_count') \
+        .sort_values(by='o_orderpriority')
+
+    return result
+    # end of your codes
 
 
 if __name__ == "__main__":
@@ -35,10 +52,10 @@ if __name__ == "__main__":
                       'o_clerk', 'o_shippriority', 'o_comment']
 
     # run the test
-    result = pandas_q4("1993-7-01",orders,lineitem)
+    result = pandas_q4("1993-7-01", orders, lineitem)
     # result.to_csv("correct_results/pandas_q4.csv", float_format='%.3f')
     with tempfile.NamedTemporaryFile(mode='w') as f:
-        result.to_csv(f.name, float_format='%.3f',index=False)
+        result.to_csv(f.name, float_format='%.3f', index=False)
         result = pd.read_csv(f.name)
         correct_result = pd.read_csv("correct_results/pandas_q4.csv")
         try:
@@ -46,4 +63,5 @@ if __name__ == "__main__":
             print("*******************pass**********************")
         except Exception as e:
             logger.error("Exception Occurred:" + str(e))
-            print(f"*******************failed, your incorrect result is {result}**************")
+            print(
+                f"*******************failed, your incorrect result is {result}**************")

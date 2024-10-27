@@ -15,10 +15,34 @@ import util.judge_df_equal
 
 
 def pandas_q3(segment: str, customer: pd.DataFrame, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFrame:
-    #TODO: your codes begin
-    return pd.DataFrame()
-    #end of your codes
+    orders['o_orderdate'] = pd.to_datetime(orders['o_orderdate'])
+    lineitem['l_shipdate'] = pd.to_datetime(lineitem['l_shipdate'])
 
+    joined_df = pd.merge(
+        pd.merge(
+            customer[customer['c_mktsegment'] == segment],
+            orders,
+            left_on='c_custkey',
+            right_on='o_custkey'
+        ),
+        lineitem,
+        left_on='o_orderkey',
+        right_on='l_orderkey'
+    )
+
+    filtered_df = joined_df[
+        (joined_df['o_orderdate'] < pd.to_datetime('1995-03-15')) &
+        (joined_df['l_shipdate'] > pd.to_datetime('1995-03-15'))
+    ]
+    def getValueAt(df, x, name): return df.loc[x.index, name]
+
+    result_df = filtered_df.groupby(['l_orderkey', 'o_orderdate', 'o_shippriority']).agg(
+        revenue=('l_extendedprice', lambda x: (
+            x * (1 - getValueAt(filtered_df, x, 'l_discount'))).sum())
+    ).sort_values(by=['revenue', 'o_orderdate'], ascending=[False, True]).reset_index().head(10)
+
+    return result_df
+    # end of your codes
 
 
 if __name__ == "__main__":
@@ -29,7 +53,6 @@ if __name__ == "__main__":
     lineitem = pd.read_csv("tables/lineitem.csv", header=None, delimiter="|")
     orders = pd.read_csv("tables/orders.csv", header=None, delimiter="|")
     customer = pd.read_csv("tables/customer.csv", header=None, delimiter="|")
-
 
     lineitem.columns = ['l_orderkey', 'l_partkey', 'l_suppkey', 'l_linenumber', 'l_quantity', 'l_extendedprice',
                         'l_discount', 'l_tax', 'l_returnflag', 'l_linestatus', 'l_shipdate', 'l_commitdate',
@@ -43,7 +66,7 @@ if __name__ == "__main__":
     result = pandas_q3('BUILDING', customer, orders, lineitem)
     # result.to_csv("correct_results/pandas_q3.csv", float_format='%.3f')
     with tempfile.NamedTemporaryFile(mode='w') as f:
-        result.to_csv(f.name, float_format='%.3f',index=False)
+        result.to_csv(f.name, float_format='%.3f', index=False)
         result = pd.read_csv(f.name)
         correct_result = pd.read_csv("correct_results/pandas_q3.csv")
         try:
@@ -51,4 +74,5 @@ if __name__ == "__main__":
             print("*******************pass**********************")
         except Exception as e:
             logger.error("Exception Occurred:" + str(e))
-            print(f"*******************failed, your incorrect result is {result}**************")
+            print(
+                f"*******************failed, your incorrect result is {result}**************")
