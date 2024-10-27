@@ -37,7 +37,7 @@ def ray_q4(time: str, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFr
     orders = orders[(orders['o_orderdate'] >= start_time) & (
         orders['o_orderdate'] < start_time + pd.DateOffset(months=3))]
 
-    lineitems = np.array_split(lineitem, 8)
+    lineitems = np.array_split(lineitem, 2)
     tasks = [process.remote(orders, litem) for litem in lineitems]
     results = pd.concat(ray.get(tasks))
     return results.groupby('o_orderpriority').agg(

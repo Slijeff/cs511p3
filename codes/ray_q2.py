@@ -34,7 +34,7 @@ def process(data, timediff):
 
 
 def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
-    chunks = np.array_split(lineitem, 8)
+    chunks = np.array_split(lineitem, 2)
     tasks = [process.remote(chunk, timediff) for chunk in chunks]
     results = ray.get(tasks)
     results = pd.concat(results)
