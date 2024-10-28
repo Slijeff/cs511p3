@@ -180,7 +180,7 @@ try:
     print("*******************pass ray q3**********************")
     score += 15
 except Exception as e:
-    logger.error("Exception Occurred:" + str(e))
+    logger.error("Exception Occurred at Q3:" + str(e))
     print("*******************failed ray q3**********************")
     pass
 
@@ -198,7 +198,7 @@ try:
     print("*******************pass ray q4**********************")
     score += 15
 except Exception as e:
-    logger.error("Exception Occurred:" + str(e))
+    logger.error("Exception Occurred at Q4:" + str(e))
     print("*******************failed ray q4**********************")
 
 

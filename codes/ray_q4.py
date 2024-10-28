@@ -32,6 +32,8 @@ def process(orders, lineitem):
 
 
 def ray_q4(time: str, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFrame:
+    return pd.DataFrame()
+
     start_time = pd.to_datetime(time)
     orders['o_orderdate'] = pd.to_datetime(orders['o_orderdate'])
     orders = orders[(orders['o_orderdate'] >= start_time) & (

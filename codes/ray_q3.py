@@ -43,6 +43,8 @@ def process(customer, orders, lineitem):
 
 
 def ray_q3(segment: str, customer: pd.DataFrame, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFrame:
+    return pd.DataFrame()
+
     customer = customer[customer['c_mktsegment'] == segment]
     orders = np.array_split(orders, 2)
     lineitem = np.array_split(lineitem, 2)
