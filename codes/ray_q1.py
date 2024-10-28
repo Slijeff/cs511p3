@@ -10,7 +10,6 @@ import ray
 import typing
 import numpy as np
 
-ray.shutdown()
 ray.init()
 
 

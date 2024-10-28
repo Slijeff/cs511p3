@@ -13,7 +13,6 @@ import util.judge_df_equal
 import tempfile
 
 
-ray.shutdown()
 ray.init()
 
 
