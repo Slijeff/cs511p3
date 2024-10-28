@@ -47,9 +47,7 @@ def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
 
     chunks = np.array_split(lineitem, 8)
     tasks = [process.remote(chunk, timediff) for chunk in chunks]
-    del chunks
     results = ray.get(tasks)
-    del tasks
     results = pd.concat(results)
     results = results.groupby(['l_returnflag', 'l_linestatus']).agg(
         sum_qty=('sum_qty', 'sum'),
