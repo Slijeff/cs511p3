@@ -14,20 +14,16 @@ import tempfile
 
 
 @ray.remote
-def process(data: pd.DataFrame, timediff):
-
-    data['l_shipdate'] = pd.to_datetime(data['l_shipdate'])
-    filtered_df = data[data['l_shipdate'] <= pd.to_datetime(
-        '1998-12-01') - pd.DateOffset(days=timediff)]
+def process(data: pd.DataFrame):
 
     def getValueAt(df, x, name): return df.loc[x.index, name]
-    result_df = filtered_df.groupby(['l_returnflag', 'l_linestatus']).agg(
+    result_df = data.groupby(['l_returnflag', 'l_linestatus']).agg(
         sum_qty=('l_quantity', 'sum'),
         sum_base_price=('l_extendedprice', 'sum'),
         sum_disc_price=('l_extendedprice', lambda x: (
-            x * (1 - getValueAt(filtered_df, x, 'l_discount'))).sum()),
+            x * (1 - getValueAt(data, x, 'l_discount'))).sum()),
         sum_charge=('l_extendedprice', lambda x: (
-            x * (1 - getValueAt(filtered_df, x, 'l_discount')) * (1 + getValueAt(filtered_df, x, 'l_tax'))).sum()),
+            x * (1 - getValueAt(data, x, 'l_discount')) * (1 + getValueAt(data, x, 'l_tax'))).sum()),
         sum_disc=('l_discount', 'sum'),
         count_order=('l_orderkey', 'count')
     ).reset_index()
@@ -38,20 +34,23 @@ def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
     # print size before and after
     # print("lineitem memory before: ", lineitem.memory_usage(
     #     deep=True).sum() / 1024 / 1024, "MB")
-    lineitem.drop(columns=[
-        'l_comment',
-        'l_shipmode',
-        'l_shipinstruct',
-        'l_receiptdate',
-        'l_suppkey',
-        'l_partkey',
-        'l_commitdate'
-    ], inplace=True)
+    # lineitem.drop(columns=[
+    #     'l_comment',
+    #     'l_shipmode',
+    #     'l_shipinstruct',
+    #     'l_receiptdate',
+    #     'l_suppkey',
+    #     'l_partkey',
+    #     'l_commitdate'
+    # ], inplace=True)
     # print("lineitem memory after: ", lineitem.memory_usage(
     #     deep=True).sum() / 1024 / 1024, "MB")
 
+    lineitem['l_shipdate'] = pd.to_datetime(lineitem['l_shipdate'])
+    lineitem = lineitem[lineitem['l_shipdate'] <= pd.to_datetime(
+        '1998-12-01') - pd.DateOffset(days=timediff)]
     chunks = np.array_split(lineitem, 16)
-    tasks = [process.remote(chunk, timediff) for chunk in chunks]
+    tasks = [process.remote(chunk) for chunk in chunks]
     results = ray.get(tasks)
     results = pd.concat(results)
     results = results.groupby(['l_returnflag', 'l_linestatus']).agg(
