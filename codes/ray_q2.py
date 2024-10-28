@@ -32,18 +32,19 @@ def process(data: pd.DataFrame):
 
 def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
     # print size before and after
-    # print("lineitem memory before: ", lineitem.memory_usage(
-    #     deep=True).sum() / 1024 / 1024, "MB")
-    lineitem.drop(columns=[
+    print("lineitem memory before: ", lineitem.memory_usage(
+        deep=True).sum() / 1024 / 1024, "MB")
+    lineitem = lineitem.drop(columns=[
         'l_comment',
         'l_shipmode',
         'l_shipinstruct',
         'l_receiptdate',
         'l_suppkey',
         'l_partkey',
-    ], inplace=True)
-    # print("lineitem memory after: ", lineitem.memory_usage(
-    #     deep=True).sum() / 1024 / 1024, "MB")
+        'l_commitdate'
+    ])
+    print("lineitem memory after: ", lineitem.memory_usage(
+        deep=True).sum() / 1024 / 1024, "MB")
 
     lineitem['l_shipdate'] = pd.to_datetime(lineitem['l_shipdate'])
     lineitem = lineitem[lineitem['l_shipdate'] <= pd.to_datetime(
