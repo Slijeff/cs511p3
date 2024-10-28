@@ -66,6 +66,7 @@ def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
     results_3['avg_price'] /= results_3['count_order']
     results_3['avg_disc'] /= results_3['count_order']
     results_4 = results_3.sort_values(by=['l_returnflag', 'l_linestatus'])
+    ray.shutdown()
     return results_4
     # end of your codes
 
