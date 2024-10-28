@@ -14,7 +14,10 @@ import tempfile
 
 
 @ray.remote
-def process(data: pd.DataFrame):
+def process(data: pd.DataFrame, timediff):
+    data['l_shipdate'] = pd.to_datetime(data['l_shipdate'])
+    data = data[data['l_shipdate'] <= pd.to_datetime(
+        '1998-12-01') - pd.DateOffset(days=timediff)]
 
     def getValueAt(df, x, name): return df.loc[x.index, name]
     result_df = data.groupby(['l_returnflag', 'l_linestatus']).agg(
@@ -42,11 +45,8 @@ def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
         'l_commitdate'
     ])
 
-    lineitem['l_shipdate'] = pd.to_datetime(lineitem['l_shipdate'])
-    lineitem = lineitem[lineitem['l_shipdate'] <= pd.to_datetime(
-        '1998-12-01') - pd.DateOffset(days=timediff)]
     chunks = np.array_split(lineitem, 8)
-    tasks = [process.remote(chunk) for chunk in chunks]
+    tasks = [process.remote(chunk, timediff) for chunk in chunks]
     del chunks
     results = ray.get(tasks)
     del tasks
