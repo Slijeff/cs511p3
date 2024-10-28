@@ -32,8 +32,6 @@ def process(data: pd.DataFrame):
 
 def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
     # print size before and after
-    print("lineitem memory before: ", lineitem.memory_usage(
-        deep=True).sum() / 1024 / 1024, "MB")
     lineitem = lineitem.drop(columns=[
         'l_comment',
         'l_shipmode',
@@ -43,15 +41,15 @@ def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
         'l_partkey',
         'l_commitdate'
     ])
-    print("lineitem memory after: ", lineitem.memory_usage(
-        deep=True).sum() / 1024 / 1024, "MB")
 
     lineitem['l_shipdate'] = pd.to_datetime(lineitem['l_shipdate'])
     lineitem = lineitem[lineitem['l_shipdate'] <= pd.to_datetime(
         '1998-12-01') - pd.DateOffset(days=timediff)]
-    chunks = np.array_split(lineitem, 16)
+    chunks = np.array_split(lineitem, 8)
     tasks = [process.remote(chunk) for chunk in chunks]
+    del chunks
     results = ray.get(tasks)
+    del tasks
     results = pd.concat(results)
     results = results.groupby(['l_returnflag', 'l_linestatus']).agg(
         sum_qty=('sum_qty', 'sum'),

@@ -18,18 +18,27 @@ logger = logging.getLogger()
 # *****************************************define the parameters****************************
 parser = argparse.ArgumentParser(description='grader for cs511 Pandas/Ray.')
 
-parser.add_argument('--p1', type=str, default="1994-01-01", help='parameter for pandas_q1')
-parser.add_argument('--p2', type=int, default=90, help='parameter for pandas_q2')
-parser.add_argument('--p3', type=str, default='BUILDING', help='parameter for pandas_q3')
-parser.add_argument('--p4', type=str, default="1993-7-01", help='parameter for pandas_q4')
+parser.add_argument('--p1', type=str, default="1994-01-01",
+                    help='parameter for pandas_q1')
+parser.add_argument('--p2', type=int, default=90,
+                    help='parameter for pandas_q2')
+parser.add_argument('--p3', type=str, default='BUILDING',
+                    help='parameter for pandas_q3')
+parser.add_argument('--p4', type=str, default="1993-7-01",
+                    help='parameter for pandas_q4')
 
-parser.add_argument('--r1', type=str, default="1994-01-01", help='parameter for ray_q1')
+parser.add_argument('--r1', type=str, default="1994-01-01",
+                    help='parameter for ray_q1')
 parser.add_argument('--r2', type=int, default=90, help='parameter for ray_q2')
-parser.add_argument('--r3', type=str, default='BUILDING', help='parameter for ray_q3')
-parser.add_argument('--r4', type=str, default="1993-7-01", help='parameter for ray_q4')
+parser.add_argument('--r3', type=str, default='BUILDING',
+                    help='parameter for ray_q3')
+parser.add_argument('--r4', type=str, default="1993-7-01",
+                    help='parameter for ray_q4')
 
-parser.add_argument('--pq1a', type=float, default=123141078.2283, help='correct answer for pandas q1')
-parser.add_argument('--rq1a', type=float, default=123141078.2283, help='correct answer for ray q1')
+parser.add_argument('--pq1a', type=float, default=123141078.2283,
+                    help='correct answer for pandas q1')
+parser.add_argument('--rq1a', type=float,
+                    default=123141078.2283, help='correct answer for ray q1')
 # **************************************************************************************************
 
 
@@ -51,8 +60,10 @@ lineitem.columns = ['l_orderkey', 'l_partkey', 'l_suppkey', 'l_linenumber', 'l_q
                     'l_discount', 'l_tax', 'l_returnflag', 'l_linestatus', 'l_shipdate', 'l_commitdate',
                     'l_receiptdate', 'l_shipinstruct', 'l_shipmode', 'l_comment']
 region.columns = ['r_regionkey', 'r_name', 'r_comment']
-supplier.columns = ['s_suppkey', 's_name', 's_address', 's_nationkey', 's_phone', 's_acctbal', 's_comment']
-partsupp.columns = ['ps_partkey', 'ps_suppkey', 'ps_availqty', 'ps_supplycost', 'ps_comment']
+supplier.columns = ['s_suppkey', 's_name', 's_address',
+                    's_nationkey', 's_phone', 's_acctbal', 's_comment']
+partsupp.columns = ['ps_partkey', 'ps_suppkey',
+                    'ps_availqty', 'ps_supplycost', 'ps_comment']
 customer.columns = ['c_custkey', 'c_name', 'c_address', 'c_nationkey', 'c_phone', 'c_acctbal', 'c_mktsegment',
                     'c_comment']
 orders.columns = ['o_orderkey', 'o_custkey', 'o_orderstatus', 'o_totalprice', 'o_orderdate', 'o_orderpriority',
@@ -150,7 +161,7 @@ try:
     print("*******************pass ray q2**********************")
     score += 15
 except Exception as e:
-    logger.error("Exception Occurred:" + str(e))
+    logger.error("Exception Occurred at Q2:" + str(e))
     print("*******************failed ray q2**********************")
     pass
 
