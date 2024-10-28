@@ -34,15 +34,14 @@ def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
     # print size before and after
     # print("lineitem memory before: ", lineitem.memory_usage(
     #     deep=True).sum() / 1024 / 1024, "MB")
-    # lineitem.drop(columns=[
-    #     'l_comment',
-    #     'l_shipmode',
-    #     'l_shipinstruct',
-    #     'l_receiptdate',
-    #     'l_suppkey',
-    #     'l_partkey',
-    #     'l_commitdate'
-    # ], inplace=True)
+    lineitem.drop(columns=[
+        'l_comment',
+        'l_shipmode',
+        'l_shipinstruct',
+        'l_receiptdate',
+        'l_suppkey',
+        'l_partkey',
+    ], inplace=True)
     # print("lineitem memory after: ", lineitem.memory_usage(
     #     deep=True).sum() / 1024 / 1024, "MB")
 
