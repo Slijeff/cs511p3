@@ -13,6 +13,10 @@ import util.judge_df_equal
 import tempfile
 
 
+ray.shutdown()
+ray.init()
+
+
 @ray.remote
 def process(data: pd.DataFrame, timediff):
     data['l_shipdate'] = pd.to_datetime(data['l_shipdate'])
@@ -45,7 +49,7 @@ def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
         'l_commitdate'
     ])
 
-    chunks = np.array_split(lineitem, 8)
+    chunks = np.array_split(lineitem, 4)
     tasks = [process.remote(chunk, timediff) for chunk in chunks]
     results_1 = ray.get(tasks)
     results_2 = pd.concat(results_1)
