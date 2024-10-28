@@ -139,6 +139,7 @@ try:
     result = ray_q1(args.r1, lineitem)
     assert abs(result - args.rq1a) < 0.01
     ray_counter += 1
+    print(f"ray counter: {ray_counter}")
     assert util.ray.success(ray_counter)
     print("*******************pass ray q1**********************")
     score += 15
@@ -158,6 +159,7 @@ try:
     assert util.judge_df_equal.judge_df_equal(
         result, correct_result), "result error"
     ray_counter += 1
+    print(f"ray counter: {ray_counter}")
     assert util.ray.success(ray_counter), "ray error"
     print("*******************pass ray q2**********************")
     score += 15

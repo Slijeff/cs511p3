@@ -30,7 +30,6 @@ def process(data, start_date):
 
 
 def ray_q1(time: str, lineitem: pd.DataFrame) -> float:
-    return pd.DataFrame()
     start_date = pd.to_datetime(time, format='%Y-%m-%d')
     chunks = np.array_split(lineitem, 8)
     tasks = [process.remote(chunk, start_date) for chunk in chunks]
