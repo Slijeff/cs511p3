@@ -47,9 +47,9 @@ def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
 
     chunks = np.array_split(lineitem, 8)
     tasks = [process.remote(chunk, timediff) for chunk in chunks]
-    results = ray.get(tasks)
-    results = pd.concat(results)
-    results = results.groupby(['l_returnflag', 'l_linestatus']).agg(
+    results_1 = ray.get(tasks)
+    results_2 = pd.concat(results_1)
+    results_3 = results_2.groupby(['l_returnflag', 'l_linestatus']).agg(
         sum_qty=('sum_qty', 'sum'),
         sum_base_price=('sum_base_price', 'sum'),
         sum_disc_price=('sum_disc_price', 'sum'),
@@ -59,11 +59,11 @@ def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
         avg_disc=('sum_disc', 'sum'),
         count_order=('count_order', 'sum')
     ).reset_index()
-    results['avg_qty'] /= results['count_order']
-    results['avg_price'] /= results['count_order']
-    results['avg_disc'] /= results['count_order']
-    results = results.sort_values(by=['l_returnflag', 'l_linestatus'])
-    return results
+    results_3['avg_qty'] /= results_3['count_order']
+    results_3['avg_price'] /= results_3['count_order']
+    results_3['avg_disc'] /= results_3['count_order']
+    results_4 = results_3.sort_values(by=['l_returnflag', 'l_linestatus'])
+    return results_4
     # end of your codes
 
 
