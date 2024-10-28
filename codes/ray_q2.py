@@ -14,7 +14,8 @@ import tempfile
 
 
 @ray.remote
-def process(data, timediff):
+def process(data: pd.DataFrame, timediff):
+
     data['l_shipdate'] = pd.to_datetime(data['l_shipdate'])
     filtered_df = data[data['l_shipdate'] <= pd.to_datetime(
         '1998-12-01') - pd.DateOffset(days=timediff)]
@@ -34,7 +35,22 @@ def process(data, timediff):
 
 
 def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
-    chunks = np.array_split(lineitem, 2)
+    # print size before and after
+    # print("lineitem memory before: ", lineitem.memory_usage(
+    #     deep=True).sum() / 1024 / 1024, "MB")
+    lineitem.drop(columns=[
+        'l_comment',
+        'l_shipmode',
+        'l_shipinstruct',
+        'l_receiptdate',
+        'l_suppkey',
+        'l_partkey',
+        'l_commitdate'
+    ], inplace=True)
+    # print("lineitem memory after: ", lineitem.memory_usage(
+    #     deep=True).sum() / 1024 / 1024, "MB")
+
+    chunks = np.array_split(lineitem, 16)
     tasks = [process.remote(chunk, timediff) for chunk in chunks]
     results = ray.get(tasks)
     results = pd.concat(results)
