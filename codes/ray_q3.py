@@ -44,10 +44,9 @@ def process(customer, orders, lineitem):
 
 def ray_q3(segment: str, customer: pd.DataFrame, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame()
-
     customer = customer[customer['c_mktsegment'] == segment]
-    orders = np.array_split(orders, 2)
-    lineitem = np.array_split(lineitem, 2)
+    orders = np.array_split(orders, 8)
+    lineitem = np.array_split(lineitem, 8)
     join_indices = [(i, j) for i in range(len(orders))
                     for j in range(len(lineitem))]
     tasks = [process.remote(customer, orders[i], lineitem[j])
