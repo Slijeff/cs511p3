@@ -194,9 +194,10 @@ try:
         result.to_csv(f.name, float_format='%.3f', index=False)
         result = pd.read_csv(f.name)
         correct_result = pd.read_csv("./correct_results" + "/ray_q4.csv")
-    assert util.judge_df_equal.judge_df_equal(result, correct_result)
+    assert util.judge_df_equal.judge_df_equal(
+        result, correct_result), "value error"
     ray_counter += 1
-    assert util.ray.success(ray_counter)
+    assert util.ray.success(ray_counter), "ray error"
     print("*******************pass ray q4**********************")
     score += 15
 except Exception as e:
