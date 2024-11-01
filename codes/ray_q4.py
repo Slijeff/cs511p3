@@ -19,9 +19,9 @@ ray.init(ignore_reinit_error=True)
 @ray.remote
 def process_4(orders, lineitem):
     # print memory usage for all dataframes
-    # print('Memory usage of the dataframes:')
-    # print(pd.concat([orders, lineitem]).memory_usage(
-    #     index=True).sum() / (1024 * 1024), 'MB')
+    print('Memory usage of the dataframes:')
+    print(pd.concat([orders, lineitem]).memory_usage(
+        index=True).sum() / (1024 * 1024), 'MB')
 
     lineitem['l_commitdate'] = pd.to_datetime(lineitem['l_commitdate'])
     lineitem['l_receiptdate'] = pd.to_datetime(lineitem['l_receiptdate'])
@@ -49,7 +49,7 @@ def ray_q4(time: str, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFr
     orders = orders[['o_orderkey', 'o_orderpriority']]
     lineitem = lineitem[['l_orderkey', 'l_commitdate', 'l_receiptdate']]
 
-    lineitems = np.array_split(lineitem, 2)
+    lineitems = np.array_split(lineitem, 8)
     tasks = [process_4.remote(orders, litem) for litem in lineitems]
     results = pd.concat(ray.get(tasks))
     return results.groupby('o_orderpriority').agg(
