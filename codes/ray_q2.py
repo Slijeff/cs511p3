@@ -17,7 +17,7 @@ ray.init(ignore_reinit_error=True)
 
 
 @ray.remote
-def process(data: pd.DataFrame):
+def process_2(data: pd.DataFrame):
     # print("chunck memory usage: ", data.memory_usage(
     #     deep=True).sum() / 1024 / 1024)
 
@@ -50,7 +50,7 @@ def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
     lineitem = lineitem[lineitem['l_shipdate'] <= pd.to_datetime(
         '1998-12-01') - pd.DateOffset(days=timediff)]
     chunks = np.array_split(lineitem, 16)
-    tasks = [process.remote(chunk) for chunk in chunks]
+    tasks = [process_2.remote(chunk) for chunk in chunks]
     results_1 = ray.get(tasks)
     results_2 = pd.concat(results_1)
     results_3 = results_2.groupby(['l_returnflag', 'l_linestatus']).agg(
