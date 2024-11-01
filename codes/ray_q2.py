@@ -12,14 +12,14 @@ import typing
 import util.judge_df_equal
 import tempfile
 
-ray.shutdown()
+# ray.shutdown()
 ray.init()
 
 
 @ray.remote
 def process(data: pd.DataFrame):
-    print("chunck memory usage: ", data.memory_usage(
-        deep=True).sum() / 1024 / 1024)
+    # print("chunck memory usage: ", data.memory_usage(
+    #     deep=True).sum() / 1024 / 1024)
 
     def getValueAt(df, x, name): return df.loc[x.index, name]
     result_df = data.groupby(['l_returnflag', 'l_linestatus']).agg(
