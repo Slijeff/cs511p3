@@ -19,9 +19,6 @@ ray.init(ignore_reinit_error=True)
 
 @ray.remote
 def process_3(customer, orders, lineitem):
-    # print memory usage for all dataframses
-    print(f"total memory usage: ", pd.concat(
-        [customer, orders, lineitem]).memory_usage().sum() / 1024 / 1024, "MB")
 
     filtered_df = pd.merge(
         pd.merge(

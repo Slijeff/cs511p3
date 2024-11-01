@@ -13,9 +13,16 @@ import typing
 import util.judge_df_equal
 import numpy as np
 
+ray.init(ignore_reinit_error=True)
+
 
 @ray.remote
-def process(orders, lineitem):
+def process_4(orders, lineitem):
+    # print memory usage for all dataframes
+    # print('Memory usage of the dataframes:')
+    # print(pd.concat([orders, lineitem]).memory_usage(
+    #     index=True).sum() / (1024 * 1024), 'MB')
+
     lineitem['l_commitdate'] = pd.to_datetime(lineitem['l_commitdate'])
     lineitem['l_receiptdate'] = pd.to_datetime(lineitem['l_receiptdate'])
 
@@ -32,15 +39,18 @@ def process(orders, lineitem):
 
 
 def ray_q4(time: str, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFrame:
-    return pd.DataFrame()
 
     start_time = pd.to_datetime(time)
     orders['o_orderdate'] = pd.to_datetime(orders['o_orderdate'])
     orders = orders[(orders['o_orderdate'] >= start_time) & (
         orders['o_orderdate'] < start_time + pd.DateOffset(months=3))]
 
+    # keep only necessary columns
+    orders = orders[['o_orderkey', 'o_orderpriority']]
+    lineitem = lineitem[['l_orderkey', 'l_commitdate', 'l_receiptdate']]
+
     lineitems = np.array_split(lineitem, 2)
-    tasks = [process.remote(orders, litem) for litem in lineitems]
+    tasks = [process_4.remote(orders, litem) for litem in lineitems]
     results = pd.concat(ray.get(tasks))
     return results.groupby('o_orderpriority').agg(
         order_count=('order_count', 'sum')
