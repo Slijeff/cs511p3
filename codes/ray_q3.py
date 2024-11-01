@@ -14,12 +14,16 @@ import typing
 
 import util.judge_df_equal
 
+ray.init(ignore_reinit_error=True)
+
 
 @ray.remote
-def process(customer, orders, lineitem):
-    orders['o_orderdate'] = pd.to_datetime(orders['o_orderdate'])
-    lineitem['l_shipdate'] = pd.to_datetime(lineitem['l_shipdate'])
-    joined_df = pd.merge(
+def process_3(customer, orders, lineitem):
+    # print memory usage for all dataframses
+    print(f"total memory usage: ", pd.concat(
+        [customer, orders, lineitem]).memory_usage().sum() / 1024 / 1024, "MB")
+
+    filtered_df = pd.merge(
         pd.merge(
             customer,
             orders,
@@ -30,10 +34,6 @@ def process(customer, orders, lineitem):
         left_on='o_orderkey',
         right_on='l_orderkey'
     )
-    filtered_df = joined_df[
-        (joined_df['o_orderdate'] < pd.to_datetime('1995-03-15')) &
-        (joined_df['l_shipdate'] > pd.to_datetime('1995-03-15'))
-    ]
     def getValueAt(df, x, name): return df.loc[x.index, name]
     result_df = filtered_df.groupby(['l_orderkey', 'o_orderdate', 'o_shippriority']).agg(
         revenue=('l_extendedprice', lambda x: (
@@ -43,13 +43,25 @@ def process(customer, orders, lineitem):
 
 
 def ray_q3(segment: str, customer: pd.DataFrame, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFrame:
-    return pd.DataFrame()
+    # return pd.DataFrame()
+
     customer = customer[customer['c_mktsegment'] == segment]
+    orders['o_orderdate'] = pd.to_datetime(orders['o_orderdate'])
+    lineitem['l_shipdate'] = pd.to_datetime(lineitem['l_shipdate'])
+    lineitem = lineitem[lineitem['l_shipdate'] > pd.to_datetime('1995-03-15')]
+    orders = orders[orders['o_orderdate'] < pd.to_datetime('1995-03-15')]
+
+    # keep only necessary columns
+    customer = customer[['c_custkey']]
+    orders = orders[['o_orderkey', 'o_custkey',
+                     'o_orderdate', 'o_shippriority']]
+    lineitem = lineitem[['l_orderkey', 'l_extendedprice', 'l_discount']]
+
     orders = np.array_split(orders, 8)
     lineitem = np.array_split(lineitem, 8)
     join_indices = [(i, j) for i in range(len(orders))
                     for j in range(len(lineitem))]
-    tasks = [process.remote(customer, orders[i], lineitem[j])
+    tasks = [process_3.remote(customer, orders[i], lineitem[j])
              for i, j in join_indices]
     results = pd.concat(ray.get(tasks))
     results = results.groupby(['l_orderkey', 'o_orderdate', 'o_shippriority']).agg(
