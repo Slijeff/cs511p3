@@ -14,7 +14,7 @@ import typing
 
 import util.judge_df_equal
 
-ray.init(ignore_reinit_error=True)
+# ray.init(ignore_reinit_error=True)
 
 
 @ray.remote

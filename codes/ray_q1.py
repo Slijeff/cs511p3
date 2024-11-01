@@ -10,7 +10,7 @@ import ray
 import typing
 import numpy as np
 
-ray.init(ignore_reinit_error=True)
+# ray.init(ignore_reinit_error=True)
 
 
 @ray.remote

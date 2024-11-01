@@ -13,7 +13,7 @@ import util.judge_df_equal
 import tempfile
 
 # ray.shutdown()
-ray.init(ignore_reinit_error=True)
+# ray.init(ignore_reinit_error=True)
 
 
 @ray.remote

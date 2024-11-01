@@ -13,15 +13,15 @@ import typing
 import util.judge_df_equal
 import numpy as np
 
-ray.init(ignore_reinit_error=True)
+# ray.init(ignore_reinit_error=True)
 
 
 @ray.remote
 def process_chunk_4(orders, lineitem):
     # print memory usage for all dataframes
-    print('Memory usage of the dataframes:')
-    print(pd.concat([orders, lineitem]).memory_usage(
-        index=True).sum() / (1024 * 1024), 'MB')
+    # print('Memory usage of the dataframes:')
+    # print(pd.concat([orders, lineitem]).memory_usage(
+    #     index=True).sum() / (1024 * 1024), 'MB')
 
     lineitem['l_commitdate'] = pd.to_datetime(lineitem['l_commitdate'])
     lineitem['l_receiptdate'] = pd.to_datetime(lineitem['l_receiptdate'])
