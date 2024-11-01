@@ -10,7 +10,7 @@ import ray
 import typing
 import numpy as np
 
-ray.init()
+ray.init(ignore_reinit_error=True)
 
 
 @ray.remote
@@ -37,7 +37,6 @@ def ray_q1(time: str, lineitem: pd.DataFrame) -> float:
     tasks = [process.remote(chunk, start_date) for chunk in chunks]
     result = ray.get(tasks)
     revenue = sum(result)
-    ray.shutdown()
     return revenue
     # end of your codes
 
