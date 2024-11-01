@@ -17,7 +17,7 @@ ray.init(ignore_reinit_error=True)
 
 
 @ray.remote
-def process_4(orders, lineitem):
+def process_chunk_4(orders, lineitem):
     # print memory usage for all dataframes
     print('Memory usage of the dataframes:')
     print(pd.concat([orders, lineitem]).memory_usage(
@@ -50,11 +50,12 @@ def ray_q4(time: str, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFr
     lineitem = lineitem[['l_orderkey', 'l_commitdate', 'l_receiptdate']]
 
     lineitems = np.array_split(lineitem, 8)
-    tasks = [process_4.remote(orders, litem) for litem in lineitems]
+    tasks = [process_chunk_4.remote(orders, litem) for litem in lineitems]
     results = pd.concat(ray.get(tasks))
-    return results.groupby('o_orderpriority').agg(
+    results = results.groupby('o_orderpriority').agg(
         order_count=('order_count', 'sum')
     ).reset_index().sort_values(by='o_orderpriority')
+    return results
 
 
 if __name__ == "__main__":
