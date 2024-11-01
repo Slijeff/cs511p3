@@ -49,7 +49,7 @@ def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
     lineitem['l_shipdate'] = pd.to_datetime(lineitem['l_shipdate'])
     lineitem = lineitem[lineitem['l_shipdate'] <= pd.to_datetime(
         '1998-12-01') - pd.DateOffset(days=timediff)]
-    chunks = np.array_split(lineitem, 8)
+    chunks = np.array_split(lineitem, 16)
     tasks = [process.remote(chunk) for chunk in chunks]
     results_1 = ray.get(tasks)
     results_2 = pd.concat(results_1)
