@@ -12,6 +12,7 @@ import ray
 import typing
 import util.judge_df_equal
 import numpy as np
+from ray.util.state import summarize_tasks
 
 # ray.init(ignore_reinit_error=True)
 
@@ -49,12 +50,18 @@ def ray_q4(time: str, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFr
     orders = orders[['o_orderkey', 'o_orderpriority']]
     lineitem = lineitem[['l_orderkey', 'l_commitdate', 'l_receiptdate']]
 
+    print("BEFORE Q4 ray parallel: ")
+    print(summarize_tasks()['cluster']['summary'])
+
     lineitems = np.array_split(lineitem, 8)
     tasks = [process_chunk_4.remote(orders, litem) for litem in lineitems]
     results = pd.concat(ray.get(tasks))
     results = results.groupby('o_orderpriority').agg(
         order_count=('order_count', 'sum')
     ).reset_index().sort_values(by='o_orderpriority')
+
+    print("After Q4 ray parallel: ")
+    print(summarize_tasks()['cluster']['summary'])
     return results
 
 
