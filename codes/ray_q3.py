@@ -40,7 +40,7 @@ def process_3(customer, orders, lineitem):
 
 
 def ray_q3(segment: str, customer: pd.DataFrame, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFrame:
-    # return pd.DataFrame()
+    return pd.DataFrame()
 
     customer = customer[customer['c_mktsegment'] == segment]
     orders['o_orderdate'] = pd.to_datetime(orders['o_orderdate'])
