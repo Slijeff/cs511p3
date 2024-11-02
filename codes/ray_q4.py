@@ -55,7 +55,8 @@ def ray_q4(time: str, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFr
 
     lineitems = np.array_split(lineitem, 8)
     tasks = [process_chunk_4.remote(orders, litem) for litem in lineitems]
-    results = pd.concat(ray.get(tasks))
+    finished, running = ray.wait(tasks, num_returns=8)
+    results = pd.concat(ray.get(finished))
     results = results.groupby('o_orderpriority').agg(
         order_count=('order_count', 'sum')
     ).reset_index().sort_values(by='o_orderpriority')
