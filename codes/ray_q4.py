@@ -63,6 +63,8 @@ def ray_q4(time: str, orders: pd.DataFrame, lineitem: pd.DataFrame) -> pd.DataFr
 
     print("After Q4 ray parallel: ")
     print(summarize_tasks()['cluster']['summary'])
+
+    ray.shutdown()
     return results
 
 

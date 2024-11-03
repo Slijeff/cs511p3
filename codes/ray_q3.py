@@ -64,6 +64,8 @@ def ray_q3(segment: str, customer: pd.DataFrame, orders: pd.DataFrame, lineitem:
     results = results.groupby(['l_orderkey', 'o_orderdate', 'o_shippriority']).agg(
         revenue=('revenue', 'sum')
     ).reset_index().sort_values(by=['revenue', 'o_orderdate'], ascending=[False, True]).head(10)
+
+    ray.shutdown()
     return results
     # end of your codes
 
