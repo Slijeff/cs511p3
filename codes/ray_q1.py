@@ -32,12 +32,14 @@ def process_1(data, start_date):
 
 
 def ray_q1(time: str, lineitem: pd.DataFrame) -> float:
-    return pd.DataFrame()
+    # return pd.DataFrame()
     start_date = pd.to_datetime(time, format='%Y-%m-%d')
     chunks = np.array_split(lineitem, 8)
     tasks = [process_1.remote(chunk, start_date) for chunk in chunks]
     result = ray.get(tasks)
     revenue = sum(result)
+
+    ray.shutdown()
     return revenue
     # end of your codes
 
