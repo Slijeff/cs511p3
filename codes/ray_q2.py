@@ -34,7 +34,7 @@ def process_2(data: pd.DataFrame):
 
 
 def ray_q2(timediff: int, lineitem: pd.DataFrame) -> pd.DataFrame:
-    # return pd.DataFrame()
+    return pd.DataFrame()
     # print size before and after
     lineitem = lineitem.drop(columns=[
         'l_comment',
