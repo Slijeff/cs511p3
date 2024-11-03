@@ -178,6 +178,7 @@ try:
         correct_result = pd.read_csv("./correct_results" + "/ray_q3.csv")
     assert util.judge_df_equal.judge_df_equal(result, correct_result)
     ray_counter += 1
+    print(f"ray counter: {ray_counter}")
     assert util.ray.success(ray_counter)
     print("*******************pass ray q3**********************")
     score += 15
@@ -197,6 +198,7 @@ try:
     assert util.judge_df_equal.judge_df_equal(
         result, correct_result), "value error"
     ray_counter += 1
+    print(f"ray counter: {ray_counter}")
     assert util.ray.success(ray_counter), "ray error"
     print("*******************pass ray q4**********************")
     score += 15
